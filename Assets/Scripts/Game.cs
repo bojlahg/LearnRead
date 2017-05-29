@@ -8,6 +8,7 @@ public class Game : MonoBehaviour
 	public static Game instance { get { return gameInstance; } }
 	//
 	private string _word = "", lastWord = "";
+
 	public string word { get { return _word; } }
 
 	private void Awake()
@@ -17,7 +18,7 @@ public class Game : MonoBehaviour
 
 	public void StartGame()
 	{
-		_word = WordBase.instance.GetRandomWord(Settings.instance.minWordLength, Settings.instance.maxWordLength, Settings.instance.capitalLetters);
+		_word = WordBase.instance.GetRandomWord(Settings.instance.wordType, Settings.instance.wordLengths.array, Settings.instance.capitalLetters);
 		lastWord = _word;
 		ReadScreen.instance.UpdateWord(_word);
 	}
@@ -26,7 +27,7 @@ public class Game : MonoBehaviour
 	{
 		do
 		{
-			_word = WordBase.instance.GetRandomWord(Settings.instance.minWordLength, Settings.instance.maxWordLength, Settings.instance.capitalLetters);
+			_word = WordBase.instance.GetRandomWord(Settings.instance.wordType, Settings.instance.wordLengths.array, Settings.instance.capitalLetters);
 		}
 		while(lastWord == _word);
 		lastWord = _word;

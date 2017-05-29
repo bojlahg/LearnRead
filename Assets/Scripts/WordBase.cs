@@ -6,8 +6,7 @@ using UnityEngine;
 public enum WordType
 {
 	Common = 0,
-	Names = 1,
-	Abbrevs = 2
+	Names = 1
 }
 
 public class WordBase: MonoBehaviour
@@ -15,13 +14,10 @@ public class WordBase: MonoBehaviour
 	private static WordBase wordBaseInstance;
 	public static WordBase instance { get  { return wordBaseInstance; } }
 	//
-	public TextAsset commonSrc, namesSrc, AbbrevSrc;
+	public TextAsset commonSrc, namesSrc;
 	//
-	private Dictionary<int, List<string>> wordDict = new Dictionary<int, List<string>>();
-	private int _minWordLength, _maxWordLength;
-
-	public int minWordLength { get { return _minWordLength; } }
-	public int maxWordLength { get { return _maxWordLength; } }
+	private Dictionary<int, List<string>> commonWordDict = new Dictionary<int, List<string>>();
+	private Dictionary<int, List<string>> nameWordDict = new Dictionary<int, List<string>>();
 
 	private void Awake()
 	{
@@ -30,70 +26,11 @@ public class WordBase: MonoBehaviour
 
 	public void Init()
 	{
-		ReadWords(commonSrc.text);
-
-		_minWordLength = 1000;
-		_maxWordLength = 0;
-		int totalCnt = 0;
-		foreach(KeyValuePair<int, List<string>> kvp in wordDict)
-		{
-			if(_minWordLength > kvp.Key)
-			{
-				_minWordLength = kvp.Key;
-			}
-			if(_maxWordLength < kvp.Key)
-			{
-				_maxWordLength = kvp.Key;
-			}
-
-			Debug.LogFormat("Length: {0} Count: {1}", kvp.Key, kvp.Value.Count);
-			totalCnt += kvp.Value.Count;
-		}
-		Debug.LogFormat("Total count: {0} Lengths: {1} to {2}", totalCnt, _minWordLength, _maxWordLength);
-
-		//
-		//SaveDictByLen();
+		ReadWords(commonSrc.text, commonWordDict);
+		ReadWords(namesSrc.text, nameWordDict);
 	}
 
-	private void SaveDictByLen()
-	{
-		foreach(KeyValuePair<int, List<string>> kvp in wordDict)
-		{
-			List<string> allcap = new List<string>(), firstcap = new List<string>(), mixcap = new List<string>(), nocap = new List<string>();
-
-			foreach(string word in kvp.Value)
-			{
-				if(word == word.ToUpper())
-				{
-					allcap.Add(word);
-				}
-				else if(word == word.ToLower())
-				{
-					nocap.Add(word);
-				}
-				else if(word[0] == char.ToUpper(word[0]))
-				{
-					firstcap.Add(word);
-				}
-				else
-				{
-					mixcap.Add(word);
-				}
-			}
-
-			allcap.Sort();
-			firstcap.Sort();
-			mixcap.Sort();
-			nocap.Sort();
-
-			System.IO.File.WriteAllLines(string.Format("{0}/Text/{1}_ac.txt", Application.dataPath, kvp.Key), allcap.ToArray());
-			System.IO.File.WriteAllLines(string.Format("{0}/Text/{1}_fc.txt", Application.dataPath, kvp.Key), firstcap.ToArray());
-			System.IO.File.WriteAllLines(string.Format("{0}/Text/{1}_mc.txt", Application.dataPath, kvp.Key), mixcap.ToArray());
-			System.IO.File.WriteAllLines(string.Format("{0}/Text/{1}_nc.txt", Application.dataPath, kvp.Key), nocap.ToArray());
-		}
-	}
-
-	public void ReadWords(string text)
+	public static void ReadWords(string text, Dictionary<int, List<string>> wordDict)
 	{
 		StringBuilder word = new StringBuilder(20);
 		char chr;
@@ -102,7 +39,7 @@ public class WordBase: MonoBehaviour
 			chr = text[i];
 			if(chr == '\n' || chr == '\r')
 			{
-				AddWord(word.ToString());
+				AddWord(word.ToString(), wordDict);
 				word.Length = 0;
 			}
 			else
@@ -110,12 +47,10 @@ public class WordBase: MonoBehaviour
 				word.Append(chr);
 			}
 		}
-		AddWord(word.ToString());
-
-		commonSrc = null;
+		AddWord(word.ToString(), wordDict);
 	}
 
-	public void AddWord(string word)
+	public static void AddWord(string word, Dictionary<int, List<string>> wordDict)
 	{
 		if(word.Length > 0)
 		{
@@ -133,20 +68,35 @@ public class WordBase: MonoBehaviour
 		}
 	}
 
-	public string GetRandomWord(int minlen, int maxlen, bool capital)
+	public string GetRandomWord(WordType wt, bool[] awl, bool capital)
 	{
+		Dictionary<int, List<string>> wordDict = null;
 		int lenidx = -1, wordidx = -1;
 		List<string> words = null;
-		do
+
+		switch(wt)
 		{
-			lenidx = Random.Range(Settings.instance.minWordLength, Settings.instance.maxWordLength);
-			if(!wordDict.TryGetValue(lenidx, out words))
+		case WordType.Common: wordDict = commonWordDict; break;
+		case WordType.Names: wordDict = nameWordDict; break;
+		}
+
+		List<int> allowed = new List<int>();
+		int idx;
+		foreach(KeyValuePair<int, List<string>> kvp in wordDict)
+		{
+			idx = kvp.Key - 2;
+			if(idx >= 0 && idx < awl.Length && awl[idx])
 			{
-				words = null;
+				allowed.Add(kvp.Key);
 			}
 		}
-		while(words == null);
 
+		lenidx = allowed[Random.Range(0, allowed.Count)];
+		if(!wordDict.TryGetValue(lenidx, out words))
+		{
+			return "ERROR!";
+		}
+		
 		wordidx = Random.Range(0, words.Count);
 
 		if(capital)
@@ -157,5 +107,32 @@ public class WordBase: MonoBehaviour
 		{
 			return words[wordidx];
 		}
+	}
+
+	public bool CheckSettings(WordType wt, bool[] awl)
+	{
+		Dictionary<int, List<string>> wordDict = null;
+		switch(wt)
+		{
+		case WordType.Common:
+			wordDict = commonWordDict;
+			break;
+		case WordType.Names:
+			wordDict = nameWordDict;
+			break;
+		}
+
+		List<int> allowed = new List<int>();
+		int idx;
+		foreach(KeyValuePair<int, List<string>> kvp in wordDict)
+		{
+			idx = kvp.Key - 2;
+			if(idx >= 0 && idx < awl.Length && awl[idx])
+			{
+				allowed.Add(kvp.Key);
+			}
+		}
+
+		return allowed.Count > 0;
 	}
 }

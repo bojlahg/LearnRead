@@ -8,8 +8,8 @@ public class SettingsScreen : UIScreen
 	private static SettingsScreen settingsScreenInstance;
 	public static SettingsScreen instance { get { return settingsScreenInstance; } }
 	//
-	public Text textMinWordLength, textMaxWordLength;
-	public Toggle toggleCapitalLetters;
+	public Toggle toggleCommonWords, toggleNames, toggleCapitalLetters, toggleColorLetters;
+	public Toggle[] toggleLengths;
 
 	public override void OnInit()
 	{
@@ -18,55 +18,72 @@ public class SettingsScreen : UIScreen
 
 	public override void OnShow()
 	{
-		textMinWordLength.text = Settings.instance.minWordLength.ToString();
-		textMaxWordLength.text = Settings.instance.maxWordLength.ToString();
 		toggleCapitalLetters.isOn = Settings.instance.capitalLetters;
+		toggleColorLetters.isOn = Settings.instance.colorLetters;
+		toggleCommonWords.isOn = Settings.instance.wordType == WordType.Common;
+		toggleNames.isOn = Settings.instance.wordType == WordType.Names;
+
+		for(int i = 0; i < toggleLengths.Length; ++i)
+		{
+			toggleLengths[i].isOn = Settings.instance.wordLengths[i];
+		}
 	}
 
 	public void Button_Start()
 	{
-		ReadScreen.instance.Show();
-		Game.instance.StartGame();
-	}
-	
-	public void Button_IncreaseMin()
-	{
-		if(Settings.instance.minWordLength + 1 <= WordBase.instance.maxWordLength)
+		if(WordBase.instance.CheckSettings(Settings.instance.wordType, Settings.instance.wordLengths.array))
 		{
-			++Settings.instance.minWordLength;
-			textMinWordLength.text = Settings.instance.minWordLength.ToString();
+			ReadScreen.instance.Show();
+			Game.instance.StartGame();
 		}
 	}
 
-	public void Button_DecreaseMin()
+	public void Toggle_Length(int idx, bool val)
 	{
-		if(Settings.instance.minWordLength - 1 >= WordBase.instance.minWordLength)
+		Settings.instance.wordLengths[idx] = val;
+	}
+
+	/*public void Button_IncreaseLength()
+	{
+		if(Settings.instance.wordLength + 1 <= WordBase.instance.maxWordLength)
 		{
-			--Settings.instance.minWordLength;
-			textMinWordLength.text = Settings.instance.minWordLength.ToString();
+			++Settings.instance.wordLength;
+			textWordLength.text = Settings.instance.wordLength.ToString();
 		}
 	}
 
-	public void Button_IncreaseMax()
+	public void Button_DecreaseLength()
 	{
-		if(Settings.instance.maxWordLength + 1 <= WordBase.instance.maxWordLength)
+		if(Settings.instance.wordLength - 1 >= WordBase.instance.minWordLength)
 		{
-			++Settings.instance.maxWordLength;
-			textMaxWordLength.text = Settings.instance.maxWordLength.ToString();
+			--Settings.instance.wordLength;
+			textWordLength.text = Settings.instance.wordLength.ToString();
+		}
+	}*/
+
+	public void Toggle_Common(bool val)
+	{
+		if(val)
+		{
+			Settings.instance.wordType = WordType.Common;
 		}
 	}
 
-	public void Button_DecreaseMax()
+	public void Toggle_Names(bool val)
 	{
-		if(Settings.instance.maxWordLength - 1 >= WordBase.instance.minWordLength)
+		if(val)
 		{
-			--Settings.instance.maxWordLength;
-			textMaxWordLength.text = Settings.instance.maxWordLength.ToString();
+			Settings.instance.wordType = WordType.Names;
 		}
 	}
 
 	public void Toggle_Caps(bool val)
 	{
 		Settings.instance.capitalLetters = val;
+	}
+
+	public void Toggle_ColorLetters(bool val)
+	{
+		Settings.instance.colorLetters = val;
 	}
 }
