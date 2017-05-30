@@ -38,8 +38,8 @@ public class ReadScreen : UIScreen
 				origchr = word[i];
 				chr = char.ToLower(origchr);
 				clrword.Append("<color=#");
-				if(chr == 'а' || chr == 'е' || chr == 'ё' || chr == 'и' || chr == 'й' ||
-					chr == 'о' || chr == 'у' || chr == 'ы' || chr == 'э' || chr == 'ю' || chr == 'я')
+				if(chr == 'а' || chr == 'е' || chr == 'ё' || chr == 'и' || chr == 'о' ||
+					chr == 'у' || chr == 'ы' || chr == 'э' || chr == 'ю' || chr == 'я')
 				{
 					clrword.Append(ColorUtility.ToHtmlStringRGBA(colorVowel));
 					clrword.Append(">");
