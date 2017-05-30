@@ -10,10 +10,15 @@ public class SettingsScreen : UIScreen
 	//
 	public Toggle toggleCommonWords, toggleNames, toggleCapitalLetters, toggleColorLetters, toggleSplitSyllables;
 	public Toggle[] toggleLengths;
+	public Text textTitle;
 
 	public override void OnInit()
 	{
 		settingsScreenInstance = this;
+
+#if APPDEMO
+		textTitle.text = "Родители учат читать\n(демо)";
+#endif
 	}
 
 	public override void OnShow()
@@ -27,7 +32,15 @@ public class SettingsScreen : UIScreen
 		for(int i = 0; i < toggleLengths.Length; ++i)
 		{
 			toggleLengths[i].isOn = Settings.instance.wordLengths[i];
+#if APPDEMO
+			if(i > 4)
+			{
+				toggleLengths[i].gameObject.SetActive(false);
+			}
+#endif
 		}
+
+
 	}
 
 	public void Button_Start()

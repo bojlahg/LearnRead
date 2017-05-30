@@ -52,19 +52,26 @@ public class WordBase: MonoBehaviour
 
 	public static void AddWord(string word, Dictionary<int, List<string>> wordDict)
 	{
-		if(word.Length > 0)
+		if(word.Length == 0)
 		{
-			List<string> words;
-			if(wordDict.TryGetValue(word.Length, out words))
-			{
-				words.Add(word);
-			}
-			else
-			{
-				words = new List<string>();
-				words.Add(word);
-				wordDict.Add(word.Length, words);
-			}
+			return;
+		}
+#if APPDEMO
+		if(word.Length > 6)
+		{
+			return;
+		}
+#endif
+		List<string> words;
+		if(wordDict.TryGetValue(word.Length, out words))
+		{
+			words.Add(word);
+		}
+		else
+		{
+			words = new List<string>();
+			words.Add(word);
+			wordDict.Add(word.Length, words);
 		}
 	}
 
