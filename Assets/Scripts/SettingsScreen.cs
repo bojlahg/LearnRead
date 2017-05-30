@@ -8,7 +8,7 @@ public class SettingsScreen : UIScreen
 	private static SettingsScreen settingsScreenInstance;
 	public static SettingsScreen instance { get { return settingsScreenInstance; } }
 	//
-	public Toggle toggleCommonWords, toggleNames, toggleCapitalLetters, toggleColorLetters;
+	public Toggle toggleCommonWords, toggleNames, toggleCapitalLetters, toggleColorLetters, toggleSplitSyllables;
 	public Toggle[] toggleLengths;
 
 	public override void OnInit()
@@ -18,10 +18,11 @@ public class SettingsScreen : UIScreen
 
 	public override void OnShow()
 	{
-		toggleCapitalLetters.isOn = Settings.instance.capitalLetters;
-		toggleColorLetters.isOn = Settings.instance.colorLetters;
 		toggleCommonWords.isOn = Settings.instance.wordType == WordType.Common;
 		toggleNames.isOn = Settings.instance.wordType == WordType.Names;
+		toggleCapitalLetters.isOn = Settings.instance.capitalLetters;
+		toggleColorLetters.isOn = Settings.instance.colorLetters;
+		toggleSplitSyllables.isOn = Settings.instance.splitSyllables;
 
 		for(int i = 0; i < toggleLengths.Length; ++i)
 		{
@@ -80,6 +81,11 @@ public class SettingsScreen : UIScreen
 	public void Toggle_Caps(bool val)
 	{
 		Settings.instance.capitalLetters = val;
+	}
+
+	public void Toggle_SplitSyllables(bool val)
+	{
+		Settings.instance.splitSyllables = val;
 	}
 
 	public void Toggle_ColorLetters(bool val)

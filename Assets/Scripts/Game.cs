@@ -19,6 +19,7 @@ public class Game : MonoBehaviour
 	public void StartGame()
 	{
 		_word = WordBase.instance.GetRandomWord(Settings.instance.wordType, Settings.instance.wordLengths.array, Settings.instance.capitalLetters);
+
 		lastWord = _word;
 		ReadScreen.instance.UpdateWord(_word);
 	}

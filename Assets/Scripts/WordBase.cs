@@ -47,7 +47,7 @@ public class WordBase: MonoBehaviour
 				word.Append(chr);
 			}
 		}
-		AddWord(word.ToString(), wordDict);
+		AddWord(word.ToString().Trim(), wordDict);
 	}
 
 	public static void AddWord(string word, Dictionary<int, List<string>> wordDict)

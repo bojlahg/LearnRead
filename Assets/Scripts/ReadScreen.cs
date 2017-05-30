@@ -10,7 +10,7 @@ public class ReadScreen : UIScreen
 	public static ReadScreen instance { get { return readScreenInstance; } }
 	//
 	public Text textWord;
-	public Color colorVowel, colorConsonant, colorOther;
+	public Color colorVowel, colorConsonant, colorOther, colorSeparator;
 
 	public override void OnInit()
 	{
@@ -24,6 +24,11 @@ public class ReadScreen : UIScreen
 
 	public void UpdateWord(string word)
 	{
+		if(Settings.instance.splitSyllables)
+		{
+			word = SyllabesRus.Convert(word);
+		}
+
 		if(Settings.instance.colorLetters)
 		{
 			StringBuilder clrword = new StringBuilder(1024);
@@ -42,6 +47,11 @@ public class ReadScreen : UIScreen
 				else if(chr == 'ь' || chr == 'ъ')
 				{
 					clrword.Append(ColorUtility.ToHtmlStringRGBA(colorOther));
+					clrword.Append(">");
+				}
+				else if(chr == '|' || chr == '-')
+				{
+					clrword.Append(ColorUtility.ToHtmlStringRGBA(colorSeparator));
 					clrword.Append(">");
 				}
 				else
