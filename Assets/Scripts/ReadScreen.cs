@@ -9,8 +9,9 @@ public class ReadScreen : UIScreen
 	private static ReadScreen readScreenInstance;
 	public static ReadScreen instance { get { return readScreenInstance; } }
 	//
-	public Text textWord;
+	public Text textWord, textStat;
 	public Color colorVowel, colorConsonant, colorOther, colorSeparator;
+	private int goodCnt = 0, badCnt = 0;
 
 	public override void OnInit()
 	{
@@ -19,7 +20,9 @@ public class ReadScreen : UIScreen
 
 	public override void OnShow()
 	{
-		
+		goodCnt = 0;
+		badCnt = 0;
+		UpdateStat();
 	}
 
 	public void UpdateWord(string word)
@@ -70,7 +73,21 @@ public class ReadScreen : UIScreen
 		}
 	}
 
-	public void Button_Next()
+	public void Button_Good()
+	{
+		Game.instance.Next();
+		++goodCnt;
+		UpdateStat();
+	}
+
+	public void Button_Bad()
+	{
+		Game.instance.Next();
+		++badCnt;
+		UpdateStat();
+	}
+
+	public void Button_Pass()
 	{
 		Game.instance.Next();
 	}
@@ -78,5 +95,10 @@ public class ReadScreen : UIScreen
 	public void Button_Quit()
 	{
 		SettingsScreen.instance.Show();
+	}
+
+	private void UpdateStat()
+	{
+		textStat.text = string.Format("<color=#8EC713FF>{0}</color> / <color=#CB1D1DFF>{1}</color>", goodCnt, badCnt);
 	}
 }
