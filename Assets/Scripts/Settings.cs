@@ -10,13 +10,14 @@ public class Settings : MonoBehaviour
 	//
 	private WordType _wordType = WordType.Common;
 	private IndexerArrayReadWrite<bool> _wordLengths = new IndexerArrayReadWrite<bool>(14);
-	private bool _capitalLetters = true, _colorLetters = true, _splitSyllables = false;
+	private bool _capitalLetters = true, _colorLetters = true, _splitSyllables = false, _soundEnabled = true;
 	//
 	public WordType wordType { get { return _wordType; } set { _wordType = value; } }
 	public IndexerArrayReadWrite<bool> wordLengths { get { return _wordLengths; } }
 	public bool capitalLetters { get { return _capitalLetters; } set { _capitalLetters = value; } }
 	public bool colorLetters { get { return _colorLetters; } set { _colorLetters = value; } }
 	public bool splitSyllables { get { return _splitSyllables; } set { _splitSyllables = value; } }
+	public bool soundEnabled { get { return _soundEnabled; } set { _soundEnabled = value; } }
 
 	private void Awake()
 	{
@@ -35,6 +36,7 @@ public class Settings : MonoBehaviour
 		_capitalLetters = PlayerPrefs.GetInt("capitalLetters", 1) == 1;
 		_colorLetters = PlayerPrefs.GetInt("colorLetters", 1) == 1;
 		_splitSyllables = PlayerPrefs.GetInt("splitSyllables", 0) == 1;
+		_soundEnabled = PlayerPrefs.GetInt("soundEnabled", 0) == 1;
 	}
 
 	public void Store()
@@ -57,6 +59,7 @@ public class Settings : MonoBehaviour
 		PlayerPrefs.SetInt("capitalLetters", _capitalLetters ? 1 : 0);
 		PlayerPrefs.SetInt("colorLetters", _colorLetters ? 1 : 0);
 		PlayerPrefs.SetInt("splitSyllables", _splitSyllables ? 1 : 0);
+		PlayerPrefs.SetInt("soundEnabled", _soundEnabled ? 1 : 0);
 		PlayerPrefs.Save();
 	}
 }

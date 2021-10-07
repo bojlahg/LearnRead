@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ReadScreen : UIScreen
 {
 	private static ReadScreen readScreenInstance;
 	public static ReadScreen instance { get { return readScreenInstance; } }
 	//
-	public Text textWord, textStat;
-	public Color colorVowel, colorConsonant, colorOther, colorSeparator;
-	private int goodCnt = 0, badCnt = 0;
+	public TextMeshProUGUI m_WordText, m_StatText;
+	public Color m_VowelColor, m_ConsonantColor, m_OtherColor, m_SeparatorColor;
+	public AudioClip[] m_GoodSounds, m_BadSounds, m_SkipSounds;
+	public AudioSource m_AudioSource;
+	//
+	private int m_GoodCount = 0, m_BadCount = 0;
 
 	public override void OnInit()
 	{
@@ -20,8 +24,8 @@ public class ReadScreen : UIScreen
 
 	public override void OnShow()
 	{
-		goodCnt = 0;
-		badCnt = 0;
+		m_GoodCount = 0;
+		m_BadCount = 0;
 		UpdateStat();
 	}
 
@@ -44,51 +48,66 @@ public class ReadScreen : UIScreen
 				if(chr == 'а' || chr == 'е' || chr == 'ё' || chr == 'и' || chr == 'о' ||
 					chr == 'у' || chr == 'ы' || chr == 'э' || chr == 'ю' || chr == 'я')
 				{
-					clrword.Append(ColorUtility.ToHtmlStringRGBA(colorVowel));
+					clrword.Append(ColorUtility.ToHtmlStringRGBA(m_VowelColor));
 					clrword.Append(">");
 				}
 				else if(chr == 'ь' || chr == 'ъ')
 				{
-					clrword.Append(ColorUtility.ToHtmlStringRGBA(colorOther));
+					clrword.Append(ColorUtility.ToHtmlStringRGBA(m_OtherColor));
 					clrword.Append(">");
 				}
 				else if(chr == '|' || chr == '-')
 				{
-					clrword.Append(ColorUtility.ToHtmlStringRGBA(colorSeparator));
+					clrword.Append(ColorUtility.ToHtmlStringRGBA(m_SeparatorColor));
 					clrword.Append(">");
 				}
 				else
 				{
-					clrword.Append(ColorUtility.ToHtmlStringRGBA(colorConsonant));
+					clrword.Append(ColorUtility.ToHtmlStringRGBA(m_ConsonantColor));
 					clrword.Append(">");
 				}
 				clrword.Append(origchr);
 				clrword.Append("</color>");
 			}
-			textWord.text = clrword.ToString();
+			m_WordText.text = clrword.ToString();
 		}
 		else
 		{
-			textWord.text = word;
+			m_WordText.text = word;
 		}
 	}
 
 	public void Button_Good()
 	{
+		if (Settings.instance.soundEnabled)
+		{
+			m_AudioSource.clip = m_GoodSounds[Random.Range(0, m_GoodSounds.Length)];
+			m_AudioSource.Play();
+		}
 		Game.instance.Next();
-		++goodCnt;
+		++m_GoodCount;
 		UpdateStat();
 	}
 
 	public void Button_Bad()
 	{
+		if (Settings.instance.soundEnabled)
+		{
+			m_AudioSource.clip = m_BadSounds[Random.Range(0, m_BadSounds.Length)];
+			m_AudioSource.Play();
+		}
 		Game.instance.Next();
-		++badCnt;
+		++m_BadCount;
 		UpdateStat();
 	}
 
-	public void Button_Pass()
+	public void Button_Skip()
 	{
+		if (Settings.instance.soundEnabled)
+		{
+			m_AudioSource.clip = m_SkipSounds[Random.Range(0, m_SkipSounds.Length)];
+			m_AudioSource.Play();
+		}
 		Game.instance.Next();
 	}
 
@@ -99,6 +118,6 @@ public class ReadScreen : UIScreen
 
 	private void UpdateStat()
 	{
-		textStat.text = string.Format("<color=#8EC713FF>{0}</color> / <color=#CB1D1DFF>{1}</color>", goodCnt, badCnt);
+		m_StatText.text = string.Format("<color=#8EC713FF>{0}</color> / <color=#CB1D1DFF>{1}</color>", m_GoodCount, m_BadCount);
 	}
 }
