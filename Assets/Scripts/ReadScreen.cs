@@ -4,6 +4,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Whisper.Utils;
+using Whisper;
 
 public class ReadScreen : UIScreen
 {
@@ -13,13 +15,33 @@ public class ReadScreen : UIScreen
 	public TextMeshProUGUI m_WordText, m_StatText;
 	public Color m_VowelColor, m_ConsonantColor, m_OtherColor, m_SeparatorColor;
 	public AudioClip[] m_GoodSounds, m_BadSounds, m_SkipSounds;
+	public Button m_RecordButton, m_GoodButton, m_SkipButton, m_BadButton;
+	public Image m_ProgressImage;
 	public AudioSource m_AudioSource;
+	public WhisperManager m_WhisperManager;
+	public MicrophoneRecord m_MicrophoneRecord;
+
+	private string m_OriginalWord;
+	private bool m_Recording = false;
+	private float m_RecordDuration = 0;
+	private float m_RecordLength = 5;
 	//
 	private int m_GoodCount = 0, m_BadCount = 0;
 
 	public override void OnInit()
 	{
+		m_MicrophoneRecord.SelectedMicDevice = null;
 		readScreenInstance = this;
+	}
+
+    public void OnEnable()
+    {
+		m_MicrophoneRecord.OnRecordStop += OnRecordStop;
+	}
+
+	public void OnDisable()
+	{
+		m_MicrophoneRecord.OnRecordStop -= OnRecordStop;
 	}
 
 	public override void OnShow()
@@ -31,7 +53,8 @@ public class ReadScreen : UIScreen
 
 	public void UpdateWord(string word)
 	{
-		if(Settings.instance.splitSyllables)
+		m_OriginalWord = word;
+		if (Settings.instance.splitSyllables)
 		{
 			word = SyllabesRus.Convert(word);
 		}
@@ -75,6 +98,12 @@ public class ReadScreen : UIScreen
 		{
 			m_WordText.text = word;
 		}
+		//
+		m_Recording = true;
+		m_RecordDuration = 0;
+		m_ProgressImage.fillAmount = 0;
+		m_SkipButton.interactable = false;
+		m_MicrophoneRecord.StartRecord();
 	}
 
 	public void Button_Good()
@@ -113,11 +142,45 @@ public class ReadScreen : UIScreen
 
 	public void Button_Quit()
 	{
+		
 		SettingsScreen.instance.Show();
 	}
 
 	private void UpdateStat()
 	{
 		m_StatText.text = string.Format("<color=#8EC713FF>{0}</color> / <color=#CB1D1DFF>{1}</color>", m_GoodCount, m_BadCount);
+	}
+
+	private async void OnRecordStop(AudioChunk recordedAudio)
+	{
+		m_Recording = false;
+		var res = await m_WhisperManager.GetTextAsync(recordedAudio.Data, recordedAudio.Frequency, recordedAudio.Channels);
+		if (res == null)
+			return;
+
+		string resultString = res.Result.ToLower();
+		resultString = resultString.Replace(" ", "");
+		resultString = resultString.Replace(",", "");
+		resultString = resultString.Replace(".", "");
+		resultString = resultString.Replace(":", "");
+		resultString = resultString.Replace("?", "");
+		resultString = resultString.Replace("/", "");
+		if (resultString.Contains(m_OriginalWord.ToLower()))
+        {
+			Button_Good();
+		}
+		else
+        {
+			Button_Bad();
+		}
+	}
+
+	private void Update()
+	{
+		if (m_Recording)
+		{
+			m_RecordDuration = (float)Microphone.GetPosition(null) / (float)m_MicrophoneRecord.frequency;
+			m_ProgressImage.fillAmount = m_RecordDuration / m_RecordLength;
+		}
 	}
 }
