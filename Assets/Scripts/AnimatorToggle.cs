@@ -19,10 +19,11 @@ public class AnimatorToggle : MonoBehaviour
 		{
 			m_Toggle = GetComponent<Toggle>();
 		}
-		if(!m_Animator)
+		if (!m_Animator)
         {
 			m_Animator = GetComponent<Animator>();
 		}
+		ValueChanged(m_Toggle.isOn);
 		m_Toggle.onValueChanged.AddListener(ValueChanged);
 	}
 

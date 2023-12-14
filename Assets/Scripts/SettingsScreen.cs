@@ -35,6 +35,7 @@ public class SettingsScreen : UIScreen
 		{
 			GameObject newgo = GameObject.Instantiate(m_WordLengthPrefab, m_WordLengthPrefab.transform.parent);
 			newgo.SetActive(true);
+			AnimatorToggle animatorToggle = newgo.GetComponent<AnimatorToggle>();
 			m_LengthToggles[i] = newgo.GetComponent<Toggle>();
 			m_LengthToggles[i].isOn = Settings.instance.wordLengths[i];
 			TextMeshProUGUI text = m_LengthToggles[i].transform.GetComponentInChildren<TextMeshProUGUI>();
@@ -57,7 +58,7 @@ public class SettingsScreen : UIScreen
 		{
 			for (int i = 0; i < m_LengthToggles.Length; ++i)
 			{
-				Settings.instance.wordLengths[i] = m_LengthToggles[i];
+				Settings.instance.wordLengths[i] = m_LengthToggles[i].isOn;
 			}
 			if (m_CommonWordsToggle.isOn)
 			{
